@@ -73,7 +73,7 @@ await fn this.TalentAcquisitionInterview([owner]) {
         ])
         TeamFit += 1
         
-        ReceiveChat("Are you ready for your online interview for our Senior Software Engineer role now?")
+        ReceiveChat("You applied for our Senior Software Engineer role. Are you ready for your online interview now?")
         await Tick(0.1s)
 
         let reply = await ChooseReply([
@@ -82,7 +82,7 @@ await fn this.TalentAcquisitionInterview([owner]) {
         ], energyCost=1)
 
         await Tick(0.2s)
-        if reply.Contains("Define") {
+        if reply.Contains("define") {
             ReceiveChat("Okay... sure, let's go ahead.")
             TeamFit -= 1
         } else {
