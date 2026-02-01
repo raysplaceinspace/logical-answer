@@ -236,7 +236,7 @@ await fn this.TechnicalInterview([owner]) {
         reply = await ChooseReply([
             "No, not really",
             "What was the reason why the last person left the company?",
-            "Tell me about your software development lifecycle",
+            "Tell me about your software development cycle",
         ])
 
         if reply.Contains("not really") {
