@@ -448,7 +448,7 @@ fn this.VictoryScreen(salary, isNewHighScore, [owner]) {
                 radius=0.5,
                 speed=50,
                 body=pos,
-                luminous=1, bloom=5, glare=1,
+                luminous=1, bloom=5, bloomAlpha=1, glare=1,
                 dissipate=1s,
             )
         }

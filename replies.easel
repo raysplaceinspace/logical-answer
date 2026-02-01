@@ -32,7 +32,7 @@ pub await fn chat.ChooseReply(options, rethinkDuration=1s, energyCost=7, [owner]
                         body=@((Random < 0.5 ? -1 : 1)*(40+20*Random), 50*SignedRandom),
                         radius=1,
                         velocity=-0.5 * body,
-                        luminous=1, bloom=5, glare=1,
+                        luminous=1, bloom=5, bloomAlpha=1, glare=1,
                         dissipate=1s,
                     )
                 }
