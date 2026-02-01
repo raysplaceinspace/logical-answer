@@ -22,7 +22,7 @@ pub fn chat.ChatWindow(sender) {
     ChatMessages = []
     
     OverlayContent {
-        Panel(padding=0, width=45, backgroundColor=Color:Background.Lighten(0.05), animate=Animate:FlyFromBottom) {
+        Panel(padding=0, width=45, backgroundColor=#fff1, animate=Animate:FlyFromBottom) {
             FlatPanel(backgroundColor=Color:Primary, padding=0) {
                 HStack {
                     HStack(padding=1) {
