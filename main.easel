@@ -83,7 +83,7 @@ await fn this.TalentAcquisitionInterview([owner]) {
 
         await Tick(0.2s)
         if reply.Contains("define") {
-            ReceiveChat("Okay... shall we go ahead?")
+            ReceiveChat("Well, shall we go ahead?")
             TeamFit -= 1
             await ChooseReply(["Yes, please go ahead"])
         } else {
@@ -131,7 +131,7 @@ await fn this.TalentAcquisitionInterview([owner]) {
         ReceiveChat("I see you are currently employed at Griffonstar Incorporated. What is your reason for wanting to leave your current employment?")
 
         reply = await ChooseReply([
-            "My boss has been promising me a promotion for 3 years but nothing has happened.",
+            "My boss has been promising me a promotion for 3 years but nothing has happened. I feel like they are taking me for granted.",
             "I feel I've grown as much as I can there and I'm ready for a bigger challenge.",
         ])
         if reply.Contains("boss") {
