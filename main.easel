@@ -83,8 +83,9 @@ await fn this.TalentAcquisitionInterview([owner]) {
 
         await Tick(0.2s)
         if reply.Contains("define") {
-            ReceiveChat("Okay... sure, let's go ahead.")
+            ReceiveChat("Okay... shall we go ahead?")
             TeamFit -= 1
+            await ChooseReply(["Yes, please go ahead"])
         } else {
             ReceiveChat("Great!")
             TeamFit += 1
