@@ -1,10 +1,6 @@
 # The Logical Answer
 
-You have just created a new Easel project.
-
-To get started:
-1. Give your game a name in `easel.toml`.
-2. Go to `main.easel` to start building your game!
+A game made for Global Game Jam 2026.
 
 # About Easel
 
