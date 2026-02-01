@@ -105,7 +105,8 @@ pub fn chat.ChatWindow(sender) {
             P(fontSize=0.9, align=Align:Center, color=#fffa) {
                 with ChatReplyHint, ChatReplyEnergyCost {
                     if ChatReplyHint == ChatReplyHint:AlternativesAvailable {
-                        Span(bold=true) { "Click and hold" }
+                        "You can "
+                        Span(bold=true) { "click and hold" }
                         " your reply to think of something else to say ("
                         Span(bold=true, color=Color:Energy) {
                             "-" + ChatReplyEnergyCost + " Energy "

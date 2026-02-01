@@ -326,7 +326,7 @@ await fn this.ManagerInterview([owner]) {
             ReceiveChat("...come on, you can do better than that.")
             reply = await ChooseReply([
                 "What else do you want me to say?",
-                "It feels refreshing and healthy. What's your favorite drink?",
+                "Water because it feels refreshing and healthy. What's your favorite drink?",
             ])
             if reply.Contains("your favorite") {
                 ReceiveChat("I love a strong coffee. Gets me up in the morning.")
