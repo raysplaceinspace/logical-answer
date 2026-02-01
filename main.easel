@@ -334,7 +334,7 @@ await fn this.ManagerInterview([owner]) {
                 TeamFit -= 3
             } else {
                 ReceiveChat("Okay, that tells me all I need to know. Thanks for your time.")
-                TeamFit -= 10
+                TeamFit -= 100
             }
         } else {
             TeamFit += 1
