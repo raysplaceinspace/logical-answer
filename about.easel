@@ -1,0 +1,21 @@
+pub page fn owner.AboutPage() {
+    Content {
+        H1 { "About this Game" }
+        P {
+            "This game was inspired by the Reddit thread "
+            Link("https://www.reddit.com/r/antiwork/comments/12y0kvi/when_are_the_stupid_questions_during_interviews/") {
+                "When are the stupid questions during interviews going to stop?"
+            }
+            " and some of the discussions "
+            Link("https://x.com/doubtpointv2/status/1996200697147359385") { "on Twitter" }
+            " around it. "
+            "Its central mechanic is built around the concept of "
+            Link("https://en.wikipedia.org/wiki/Autistic_masking") { "Autistic masking" }
+            " and "
+            Link("https://en.wikipedia.org/wiki/Spoon_theory") { "Spoon theory" }
+            ". "
+            "The interview content is all based on my real-life interactions interviewing (or co-interviewing) "
+            "around 100-200 software engineers over the course of my career. "
+        }
+    }
+}

@@ -1,0 +1,58 @@
+pub await fn chat.ChooseReply(options, rethinkDuration=1s, energyCost=7, [owner]) -> replyText {
+    let replyText = null
+    await Subspawn reply {
+        on AcceptChatReply {
+            replyText = ChatReply
+            SendChat(text=replyText)
+            Despawn
+        }
+
+        
+        let selectedReplyIndex = 0
+        let numOptionsRevealed = 1
+        loop {
+            ChatReply = options[selectedReplyIndex]
+            if options.Length <= 1 { break }
+            
+            let canRevealMoreOptions = numOptionsRevealed < options.Length
+            let hasEnoughEnergyForReveal = EnergyRemaining >= energyCost
+            ChatReplyHint = canRevealMoreOptions ? ChatReplyHint:AlternativesAvailable : ChatReplyHint:CyclingAvailable
+            ChatReplyEnergyCost = energyCost
+            
+            await ChangeChatReplyDown
+            let thinkingStart = Tick
+            
+            ChatReply = ""
+            if canRevealMoreOptions {
+                ChatReplyHint = hasEnoughEnergyForReveal ? ChatReplyHint:KeepHolding : ChatReplyHint:NotEnoughEnergy
+                behavior<energySparks> on Paint(hasEnoughEnergyForReveal ? 1 : 0.1s) {
+                    Spark(
+                        color = hasEnoughEnergyForReveal ? Color:Energy : Color:Negative,
+                        flicker=0.5,
+                        body=@((Random < 0.5 ? -1 : 1)*(40+20*Random), 50*SignedRandom),
+                        radius=1,
+                        velocity=-0.5 * body,
+                        luminous=1, bloom=5, glare=1,
+                        dissipate=1s,
+                    )
+                }
+            }
+            
+            await ChangeChatReplyUp, Tick(rethinkDuration)
+            delete behavior<energySparks>
+            
+            let thinkingDuration = Tick - thinkingStart
+
+            if thinkingDuration >= rethinkDuration && numOptionsRevealed < options.Length {
+                if hasEnoughEnergyForReveal {
+                    numOptionsRevealed += 1
+                    selectedReplyIndex = numOptionsRevealed - 1
+                    ConsumeEnergy(energyCost)
+                }
+            } else {
+                selectedReplyIndex = (selectedReplyIndex + 1) % numOptionsRevealed
+            }
+        }
+    }
+    return replyText
+}

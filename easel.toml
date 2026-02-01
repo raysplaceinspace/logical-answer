@@ -1,0 +1,9 @@
+[project]
+name = "The Logical Answer"
+domain = "easel.games/@raysplaceinspace/logical-answer"
+
+[authors]
+"u1z.DHAVSGw" = "raysplaceinspace"
+
+[engine]
+edition = 15

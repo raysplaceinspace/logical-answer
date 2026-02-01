@@ -1,0 +1,72 @@
+prop World.PlayerToBeat
+
+pub page fn owner.HomePage {
+    Toolbar {
+        FlatButton(LeaderboardPage) {
+            Icon("fa-solid fa-trophy")
+            " Leaderboard"
+        }
+        FlatButton(AboutPage) {
+            Icon("fa-solid fa-info-circle")
+            " About this Game"
+        }
+    }
+
+    ToolbarRight {
+        if IsUserLoggedIn {
+            FlatButton(ManageAccountIntent, backgroundColor=#fff1) { %(PlayerName) }
+        } else {
+            FlatButton(LoginIntent, backgroundColor=Color:Primary) { "Login" }
+        }
+    }
+    
+    once FetchLeaderboard([&BestSalary], limit=1) players {
+        PlayerToBeat = players[0]
+    }
+    
+    ContentScreen {
+        VStack(expand=1, gap=0) {
+            VStack(expand=true, vAlign=VAlign:Bottom, backgroundColor=#5045, padding=1) {
+                Standout(margin=0, animate=Animate:FlyFromTop) { Icon("fa-solid fa-bolt") }
+                Standout(margin=0, animate=Animate:Throb) {
+                    FlyInWords(ProjectName)
+                }
+            }
+            VStack(align=Align:Center, vAlign=VAlign:Middle, backgroundColor=#5041, padding=1) {
+                P(fontSize=1.2) {
+                    "You're "
+                    Span(bold=true, color=Color:Energy) { "autistic" }
+                    ". Can you get through a "
+                    Span(bold=true, color=Color:Energy) { "job interview" }
+                    "?"
+                }
+            }
+        }
+
+        Blank(height=1)
+
+        VStack(gap=0.3) {
+            P(fontSize=0.8) { "Choose Your Name" }
+            PlayerNameEditor(width=25)
+        }
+
+        RaisedButton(Main, backgroundColor=Color:Primary, width=25, fontSize=1.5) { "Play" }
+        
+        with PlayerToBeat {
+            P(fontSize=0.8) {
+                if PlayerToBeat {
+                    use owner = PlayerToBeat
+                    Link(LeaderboardPage) { "Best job offer: " }
+                    PlayerNameDisplay
+                    " was offered $" + BestSalary.Round
+                } else {
+                    Blank(height=1) // reserve space to avoid content layout shift
+                }
+            }
+        }
+
+        Blank(expand=0.5)
+
+        Blank(height=1)
+    }
+}

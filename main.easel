@@ -1,0 +1,487 @@
+pub prop World.TechnicalAbility = 0
+pub prop World.TeamFit = 0
+
+pub const Color:Background = #20151c
+
+pub game fn World.Main() {
+    SolidBackground(Color:Background)
+
+    use owner = await PlayerJoined
+
+    let interviewStart = Tick
+    await Subspawn interview {
+        EnergyDisplay
+        
+        await TalentAcquisitionInterview
+        await TechnicalInterview
+        await ManagerInterview
+        
+        Expire
+    }
+    
+    let interviewDuration = Tick - interviewStart
+    let quickness = (1 - (interviewDuration / 10m)).Clamp(0, 1)
+    ConsoleLog("Technical ability " + TechnicalAbility + ", TeamFit " + TeamFit + ", Quickness " + quickness)
+
+    await Subspawn {
+        OverlayTransmission(duration=5s) {
+            H1 {
+                FlyInWords("A few weeks later...")
+            }
+        }
+        await Tick(5s)
+        Expire
+    }
+
+    if TeamFit > 0 && TechnicalAbility > 0 {
+        let salary = Round(30000 + TechnicalAbility * 10000 + TeamFit * 1000 + quickness * 10000)
+        
+        EnergyRemaining = MaxEnergy
+        await Subspawn results {
+            EnergyDisplay
+            await PositiveResultChat(salary=)
+            Expire
+        }
+
+        let isNewHighScore = SubmitToLeaderboard(salary=)
+        
+        await Subspawn {
+            VictoryScreen(salary=, isNewHighScore=)
+        }
+        
+    } else {
+        EnergyRemaining = MaxEnergy
+        await Subspawn {
+            EnergyDisplay
+            await NegativeResultChat
+            Expire
+        }
+
+        await Subspawn {
+            DefeatScreen
+        }
+    }
+}
+
+await fn this.TalentAcquisitionInterview([owner]) {
+    await Subspawn chat {
+        ChatWindow("Suzanne Hicks")
+        
+        ReceiveChat("Hi, I'm Suzanne Hicks, talent acquisition from Panacea Software")
+        let reply = await ChooseReply([
+            "Hi Suzanne, nice to meet you!",
+        ])
+        TeamFit += 1
+        
+        ReceiveChat("Are you ready for your online interview for our Senior Software Engineer role now?")
+        await Tick(0.1s)
+
+        let reply = await ChooseReply([
+            "I don't know. " + 'How do you define "ready"?',
+            "Yes, I am ready!",
+        ], energyCost=1)
+
+        await Tick(0.2s)
+        if reply.Contains("Define") {
+            ReceiveChat("Okay... sure, let's go ahead.")
+            TeamFit -= 1
+        } else {
+            ReceiveChat("Great!")
+            TeamFit += 1
+        }
+        
+        ReceiveChat("You will meet three interviewers today, and I will be your first.")
+        ReceiveChat("How's your day been so far?")
+
+        await Tick(1s)
+        reply = await ChooseReply([
+            "Oh, well, I've been unable to do anything because I've been thinking about this interview all morning...",
+            "Not too bad, I've been looking forward to this interview all day!",
+        ])
+
+        await Tick(0.2s)
+        if reply.Contains("unable") {
+            ReceiveChat("Yes, our fast-paced environment sometimes takes a bit of getting used to.")
+            TeamFit -= 1
+        } else {
+            ReceiveChat("Glad to hear it")
+            TeamFit += 1
+        }
+
+        ReceiveChat("What is it about Panacea Software that attracted you to the role?")
+
+        await Tick(1s)
+        let reply = await ChooseReply([
+            "The money.",
+            "I want to make a difference, and I feel that Panacea's multinational reach would give me a chance to have a big impact on the world"
+        ])
+
+        if reply.Contains("money") {
+            await Tick(1s)
+            ReceiveChat("Well, I appreciate your honesty. It is good to know what is required to motivate you.")
+            TeamFit -= 5
+        } else {
+            await Tick(0.2s)
+            ReceiveChat("We are the premium provider of bean counting software in all 50 states. You will definitely get the chance to make a global impact here!")
+            TeamFit += 2
+        }
+
+        await Tick(0.2s)
+        ReceiveChat("I see you are currently employed at Griffonstar Incorporated. What is your reason for wanting to leave your current employment?")
+
+        reply = await ChooseReply([
+            "My boss has been promising me a promotion for 3 years but nothing has happened.",
+            "I feel I've grown as much as I can there and I'm ready for a bigger challenge.",
+        ])
+        if reply.Contains("boss") {
+            TeamFit -= 3
+            ReceiveChat("Our promotion system is highly structured, requiring referrals from an external committee. You'll find it to be much more transparent.")
+        } else {
+            TeamFit += 1
+        }
+
+        await Tick(0.2s)
+        ReceiveChat("Okay. Now, tell me about a time you had a conflict you've had with a co-worker. How do you respond to it?")
+
+        reply = await ChooseReply([
+            (
+                "A coworker kept asking for help every time he had any little problem, " +
+                "until one day I snapped and said " +
+                '"your literal job is to solve problems!" ' +
+                "He started figuring things out for himself after that."
+            ),
+            (
+                "I had a big disagreement with a coworker on how we should implement a particular feature. " +
+                "I made a document that enumerated the pros and cons of each option and sent it around the team. " +
+                "By the time we met the next week they were already convinced and it was an easy meeting. "
+            ),
+        ])
+        if reply.Contains("document") {
+            TeamFit += 5
+        }
+        ReceiveChat("Thank you for that answer. We pride ourselves on our radical candor here at Panacea.")
+
+        await Tick(0.2s)
+        ReceiveChat("Okay, that's all from me, I'm now going to pass you onto Lyle, our technical interviewer.")
+
+        await ChooseReply([
+            "Okay, thank you very much for your time Suzanne",
+        ])
+        TeamFit += 1
+
+        await Tick(1s)
+        Expire
+    }
+}
+
+await fn this.TechnicalInterview([owner]) {
+    await Subspawn chat {
+        ChatWindow("Lyle Guffney")
+        ReceiveChat("Hey there, I'm Lyle, I'm here to do your technical interview. I'm a coder too so don't be afraid to show me what you can do.")
+        ReceiveChat("Who knows, we could end up on the same team!")
+
+        let reply = await ChooseReply([
+            "Phew, finally someone who understands me!",
+            "Hey there Lyle, pleased to meet you!",
+        ])
+        if reply.Contains("Phew") {
+            TeamFit -= 1
+        } else {
+            TeamFit += 1
+        }
+
+        ReceiveChat("Let's say you have a drawer full of 8 black socks and 8 blue socks. How many socks do you need to take out before you get a matching pair?")
+
+        reply = await ChooseReply([
+            "Brain teasers were been proven many years ago to be an ineffective programming interview technique",
+            "9",
+            "3",
+            "It's 3 because if you get a black sock then blue sock, then whether you get a black or blue sock next you will have a matching pair.",
+        ])
+        if reply.Contains("3") {
+            ReceiveChat("Correct!")
+            TechnicalAbility += 5
+            if reply.Length > 5 {
+                TeamFit += 3
+            }
+        } else if reply == "9" {
+            ReceiveChat("Not quite... but let's move on")
+            TechnicalAbility -= 100
+        } else if reply.Contains("Brain teasers") {
+            ReceiveChat("Okay, in that case...")
+            TeamFit -= 10
+        }
+
+        await Tick(2s)
+
+        ReceiveChat("Tell me about the most difficult programming problem you have solved?")
+        let reply = await ChooseReply([
+            "It depends.",
+            "There are too many to choose from and I cannot pick one that is the 'most difficult'.",
+            "I made a programming language called Easel where any game made in that programming language can be made into a multiplayer game automatically. ",
+        ])
+        if reply.Contains("It depends") {
+            TeamFit -= 2
+            ReceiveChat("Okay...")
+        } else if reply.Contains("cannot pick") {
+            TeamFit -= 1
+            ReceiveChat("Okay...")
+        } else {
+            ReceiveChat("Wow, sounds like a huge project!")
+            TechnicalAbility += 5
+        }
+
+        ReceiveChat("Do you have any questions for me?")
+        reply = await ChooseReply([
+            "No, not really",
+            "What was the reason why the last person left the company?",
+            "Tell me about your software development lifecycle",
+        ])
+
+        if reply.Contains("not really") {
+            TeamFit -= 1
+        } else if reply.Contains("last person") {
+            TeamFit += 1 // Peers actually like honest people and you get points for this question
+            ReceiveChat("Oh, good question! It can get quite stressful sometimes here, I think they decided it was time for them to move on.")
+            ReceiveChat("We're not perfect here, I'll be honest, but we always support each other.")
+        } else if reply.Contains("development") {
+            TeamFit += 1
+            TechnicalAbility += 1
+            ReceiveChat("We do 2 week development sprints. We start each sprint with a planning session, then end it with a retrospective and demo.")
+        }
+
+        await Tick(0.5s)
+        ReceiveChat("Okay, I will now pass you on to our CEO, Alex, for your final interview round.")
+        ReceiveChat("Alex has to interview all of us before we can get hired. He knows how to see right through people.")
+
+        await ChooseReply([
+            "Okay, thank you very much for your time Lyle",
+        ])
+        
+        await Tick(3s)
+        Expire
+    }
+}
+
+await fn this.ManagerInterview([owner]) {
+    await Subspawn chat {
+        ChatWindow("Alexander Strack")
+
+        ReceiveChat("Good afternoon. My name is Alex, I'm the Founder of Panacea Software. How are you today?")
+        let reply = await ChooseReply([
+            "Tired",
+            "Good, how are you?"
+        ])
+
+        if reply.Contains("Tired") {
+            TeamFit -= 3
+            ReceiveChat("Well, we can end the interview here if you'd like?")
+            await ChooseReply([
+                "No... let's keep going",
+            ])
+        } else {
+            TeamFit += 1
+            ReceiveChat("Very well, thank you.")
+        }
+
+        ReceiveChat("Tell me about the best team you've worked on. What was it like? What made it work?")
+        reply = await ChooseReply([
+            "There was no one best team, they all had their pros and cons.",
+            "One of my first teams right after graduation. Most of the team members were actually competent, which was unusual. ",
+            (
+                "My favourite team was one of my first teams right after graduation. " +
+                "I got to interview each of them so I got to choose the people who could actually work together. "
+            ),
+        ])
+        if reply.Contains("competent") || reply.Contains("got to choose") {
+            TeamFit += 1
+            ReceiveChat("I understand. A-players only want to work with A-players, right? That's why we have such high standards here at Panacea Software.")
+        } else {
+            TeamFit -= 2
+        }
+
+        ReceiveChat("Tell me, what is your ideal way of working?")
+        reply = await ChooseReply([
+            "Working alone. Someone tells me exactly what to do, and leaves me alone until I get it done. The work takes as long as it takes. ",
+            "I am capable of solving your hardest technical problems, so I want you to give them to me and give me the space to really figure them out. ",
+        ])
+        if reply.Contains("leaves me alone") {
+            TeamFit -= 3
+        } else {
+            TechnicalAbility += 1
+            ReceiveChat("Great to hear it, we've got many difficult problems for you to sink your teeth into")
+        }
+
+        ReceiveChat("One last question. What's your favorite thing to drink?")
+        reply = await ChooseReply([
+            "Uh... how is this relevant to my job?",
+            "Water",
+            "I'm not really much of a drinker, so I would say water, it's refreshing and feels healthy! I like to keep a jug of water in the fridge for a nice cool drink any time I feel the need. "
+        ])
+        if reply.Contains("how is this relevant") {
+            ReceiveChat("Okay, that tells me all I need to know. Thanks for your time.")
+            TeamFit -= 100
+        } else if reply == "Water" {
+            ReceiveChat("...come on, you can do better than that.")
+            reply = await ChooseReply([
+                "What else do you want me to say?",
+                "It feels refreshing and healthy. What's your favorite drink?",
+            ])
+            if reply.Contains("your favorite") {
+                ReceiveChat("I love a strong coffee. Gets me up in the morning.")
+                ReceiveChat("Okay, that concludes your interview, you'll be hearing from us in 2-3 weeks once we've made our decision.")
+                TeamFit -= 3
+            } else {
+                ReceiveChat("Okay, that tells me all I need to know. Thanks for your time.")
+                TeamFit -= 10
+            }
+        } else {
+            TeamFit += 1
+            ReceiveChat("Water keeps your brain sharp, I like it.")
+            ReceiveChat("Okay, that concludes your interview, you'll be hearing from us in 2-3 weeks once we've made our decision.")
+        }
+
+        await ChooseReply([
+            "Okay, thanks for your time Alex."
+        ])
+        
+        await Tick(3s)
+        Expire
+    }
+}
+
+await fn this.PositiveResultChat(salary, [owner]) {
+    await Subspawn chat {
+        ChatWindow("Suzanne Hicks")
+
+        ReceiveChat("Hi, its Suzanne Hicks again, talent acquisition from Panacea Software")
+        await ChooseReply([
+            "Hello again Suzanne"
+        ])
+        
+        ReceiveChat("I am pleased to inform you that your job application has been successful. ")
+        ReceiveChat("We are willing to offer you a starting salary of $" + salary + " per annum")
+        let reply = await ChooseReply([
+            "Oh, that's great to hear!",
+            "That's great to hear Suzanne! Looking forward to joining the team.",
+        ])
+        
+        ReceiveChat("Please drop by the office and we'll finish all the paperwork.")
+        let reply = await ChooseReply([
+            "Of course, I will drop by later today",
+        ])
+        
+        await Tick(3s)
+        Expire
+    }
+}
+
+await fn this.NegativeResultChat([owner]) {
+    await Subspawn chat {
+        ChatWindow("Suzanne Hicks")
+
+        ReceiveChat("Hi, its Suzanne Hicks again, talent acquisition from Panacea Software")
+        await ChooseReply([
+            "Hello again Suzanne"
+        ])
+        
+        ReceiveChat("I regret to inform you that your job application has not been successful. ")
+        ReceiveChat("There were many great candidates and we could only choose one.")
+
+        let reply = await ChooseReply([
+            "Oh. Okay.",
+            "Thank you for providing me with the opportunity. Do you have any feedback on how I could improve for next time?"
+        ])
+
+        if reply.Contains("feedback") {
+            if TeamFit <= 0 {
+                ReceiveChat("We felt that out of the many candidates, you were not the best fit for our team culture at this time.")
+            } else {
+                ReceiveChat("We chose another candidate who had more technical experience")
+            }
+
+            await ChooseReply([
+                "Okay",
+                "Okay, thank you for the feedback"
+            ])
+        }
+        
+        ReceiveChat("Best of luck with your job search in the future.")
+        
+        await Tick(5s)
+        Expire
+    }
+}
+
+fn this.VictoryScreen(salary, isNewHighScore, [owner]) {
+    OverlayContent {
+        VStack(align=Align:Center) {
+            Standout(fontSize=4) {
+                FlyInWords("You got the job!")
+            }
+            P { "Congratulations!"}
+            P {
+                "Your starting salary: "
+                Span(bold=true) { "$" + salary }
+            }
+            if isNewHighScore {
+                P(bold=true, color=#e580ff, fontSize=1.4) {
+                    "New high score!"
+                }
+            }
+            Blank(height=1)
+            HStack(align=Align:Center) {
+                RaisedButton(Main, backgroundColor=Color:Primary) { "Play Again" }
+                RaisedButton(LeaderboardPage, backgroundColor=Color:Secondary) { "High Scores" }
+            }
+        }
+    }
+
+    const FireworkColors = [#f04, #fb0, #0f4, #04f, #b0f]
+    on Paint(0.5s * Random) {
+        use pos = @(SignedRandom*50, SignedRandom*50)
+        use color = PickRandom(FireworkColors)
+        repeat 10 {
+            Spark(
+                flicker=0.5,
+                radius=0.5,
+                speed=50,
+                body=pos,
+                luminous=1, bloom=5, glare=1,
+                dissipate=1s,
+            )
+        }
+    }
+}
+
+fn this.DefeatScreen([owner]) {
+    OverlayContent {
+        VStack(align=Align:Center) {
+            Standout(fontSize=4) {
+                FlyInWords("Rejected")
+            }
+            P { "You did not get the job, this time" }
+            Blank(height=1)
+            HStack(align=Align:Center) {
+                RaisedButton(Main, backgroundColor=Color:Primary) { "Play Again" }
+                RaisedButton(LeaderboardPage, backgroundColor=Color:Secondary) { "High Scores" }
+            }
+        }
+    }
+    
+    on Paint(0.25s*Random) {
+        use pos = @(SignedRandom*50, -50)
+        use color = Color:Negative
+        repeat 10 {
+            Spark(
+                flicker=0.1,
+                radius=0.5,
+                shine=0.2,
+                velocity=@(0, 25),
+                body=pos,
+                luminous=1, bloom=5, glare=1,
+                dissipate=2s,
+            )
+        }
+    }
+}

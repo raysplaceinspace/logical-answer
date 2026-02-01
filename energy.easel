@@ -1,0 +1,33 @@
+pub const MaxEnergy = 100
+pub prop World.EnergyRemaining = MaxEnergy
+pub const Color:Energy = #fa0
+
+pub fn this.EnergyDisplay() {
+    CommandBar {
+        VStack(padding=1) {
+            InsetPanel(zStack=true, use width=45, align=Align:Center, padding=0) {
+                with EnergyRemaining {
+                    let proportion = EnergyRemaining / MaxEnergy
+                    HStack(align=Align:Center) {
+                        FlatPanel(width=proportion*width, backgroundColor=Color:Energy.Fade(0.75), height=2) { }
+                    }
+                }
+                ZOverlay {
+                    VStack(align=Align:Center, vAlign=VAlign:Middle) {
+                        P(color=Color:Energy, bold=true) {
+                            Icon("fa-solid fa-bolt")
+                            " Energy Remaining: "
+                            with EnergyRemaining {
+                                Span(bold=true) { %(EnergyRemaining) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn World.ConsumeEnergy(amount) {
+    EnergyRemaining = (EnergyRemaining - amount).Max(0)
+}
