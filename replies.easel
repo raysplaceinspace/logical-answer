@@ -1,108 +1,55 @@
-pub gallery chat.ChatReplyPanel
-pub gallery chat.ChatReplyHintPanel
+pub gallery chat.ChatReplyContent
+pub gallery chat.ChatReplyButton
+pub gallery chat.ChatReplyHint
 
-prop chat.ChatReply
-
-prop chat.ChatReplyHint
-prop chat.ChatReplyEnergyCost = 1
-symbol ChatReplyHint:AlternativesAvailable
-symbol ChatReplyHint:KeepHolding
-symbol ChatReplyHint:CyclingAvailable
-symbol ChatReplyHint:NotEnoughEnergy
-
-pub fn chat.ChatReplyControls {
-    give ChatReplyPanel {
-        InsetPanel(padding=0) {
-            HStack(hPadding=0.5, vPadding=0.5, vAlign=VAlign:Middle) {
-                with ChatReplyHint {
-                    Link(
-                        HoldIntent<changeReply>,
-                        bold=false, expand=true, padding=0.5, align=Align:Left,
-                        color = ChatReplyHint ? undefined : #fff) {
-                        P {
-                            with ChatReply {
-                                let revealLength = 1
-                                with Tick(0.02s) {
-                                    %(ChatReply.Substring(0, revealLength))
-                                    if revealLength < ChatReply.Length {
-                                        revealLength += 1
-                                    } else {
-                                        break
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            
-                with ChatReply {
-                    if ChatReply {
-                        RaisedButton(PressIntent<acceptReply>, backgroundColor=Color:Primary) { "Send" }
-                    } else {
-                        RaisedButton(backgroundColor=Color:Primary, opacity=0.5) { "Send" }
-                    }
-                }
-            }
-        }
-    }
-
-    give ChatReplyHintPanel {
-        VStack(minHeight=1.5) {
-            P(fontSize=0.9, align=Align:Center, color=#fffa) {
-                with ChatReplyHint, ChatReplyEnergyCost {
-                    if ChatReplyHint == ChatReplyHint:AlternativesAvailable {
-                        "You can "
-                        Span(bold=true) { "click and hold" }
-                        " your reply to think of something else to say ("
-                        Span(bold=true, color=Color:Energy) {
-                            "-" + ChatReplyEnergyCost + " Energy "
-                            Icon("fa-solid fa-bolt")
-                        }
-                        ")"
-                    } else if ChatReplyHint == ChatReplyHint:KeepHolding {
-                        Span(bold=true) { "Keep holding" }
-                        "... thinking of something else to say"
-                    } else if ChatReplyHint == ChatReplyHint:NotEnoughEnergy {
-                        Span(bold=true, color=Color:Negative) { "Not enough energy" }
-                    } else if ChatReplyHint == ChatReplyHint:CyclingAvailable {
-                        Span(bold=true) { "Click" }
-                        " your reply to cycle between options"
-                    }
-                }
-            }
-        }
-    }
-}
+gallery reply.ChatReplyText
 
 pub await fn chat.ChooseReply(options, rethinkDuration=1s, energyCost=7, [owner]) -> replyText {
     let replyText = null
     await Subspawn reply {
-        on Pressed<acceptReply> {
-            replyText = ChatReply
-            SendChat(text=replyText)
-            ChatReply = null
-            ChatReplyHint = null
-            Despawn
-        }
-
-        
         let selectedReplyIndex = 0
         let numOptionsRevealed = 1
         loop {
-            ChatReply = options[selectedReplyIndex]
+            replyText = options[selectedReplyIndex]
+            DisplayChatReplyControls(replyText=, hasAlternatives = options.Length > 1)
+            
             if options.Length <= 1 { break }
             
             let canRevealMoreOptions = numOptionsRevealed < options.Length
             let hasEnoughEnergyForReveal = EnergyRemaining >= energyCost
-            ChatReplyHint = canRevealMoreOptions ? ChatReplyHint:AlternativesAvailable : ChatReplyHint:CyclingAvailable
-            ChatReplyEnergyCost = energyCost
+
+            if canRevealMoreOptions {
+                give<hint> ChatReplyHint {
+                    "You can "
+                    Span(bold=true) { "click and hold" }
+                    " your reply to think of something else to say ("
+                    Span(bold=true, color=Color:Energy) {
+                        "-" + energyCost + " Energy "
+                        Icon("fa-solid fa-bolt")
+                    }
+                    ")"
+                }
+            } else {
+                give<hint> ChatReplyHint {
+                    Span(bold=true) { "Click" }
+                    " your reply to cycle between options"
+                }
+            }
             
             await Pressed<changeReply>
             let thinkingStart = Tick
             
-            ChatReply = ""
             if canRevealMoreOptions {
-                ChatReplyHint = hasEnoughEnergyForReveal ? ChatReplyHint:KeepHolding : ChatReplyHint:NotEnoughEnergy
+                if hasEnoughEnergyForReveal {
+                    give<hint> ChatReplyHint {
+                        Span(bold=true) { "Keep holding" }
+                        "... thinking of something else to say"
+                    }
+                } else {
+                    give<hint> ChatReplyHint {
+                        Span(bold=true, color=Color:Negative) { "Not enough energy" }
+                    }
+                }
                 behavior<energySparks> on Paint(hasEnoughEnergyForReveal ? 1 : 0.1s) {
                     Spark(
                         color = hasEnoughEnergyForReveal ? Color:Energy : Color:Negative,
@@ -133,4 +80,47 @@ pub await fn chat.ChooseReply(options, rethinkDuration=1s, energyCost=7, [owner]
         }
     }
     return replyText
+}
+
+fn reply.DisplayChatReplyControls(replyText, hasAlternatives, [chat]) {
+    give ChatReplyContent {
+        if hasAlternatives {
+            Link(
+                HoldIntent<changeReply>,
+                bold=false, expand=true, padding=0.5, align=Align:Left) {
+    
+                ChatReplyText
+            }
+        } else {
+            HStack(expand=true, padding=0.5, align=Align:Left) {
+                ChatReplyText
+            }
+        }
+    }
+
+    give<replyText> ChatReplyText {
+        P {
+            let revealLength = 1
+            with Tick(0.02s) {
+                %(replyText.Substring(0, revealLength))
+                if revealLength < replyText.Length {
+                    revealLength += 1
+                } else {
+                    break
+                }
+            }
+        }
+    }
+    once Pressed<changeReply> {
+        delete give<replyText>
+    }
+    
+    once Pressed<acceptReply> {
+        SendChat(text=replyText)
+        Expire
+    }
+    
+    give ChatReplyButton {
+        RaisedButton(PressIntent<acceptReply>, backgroundColor=Color:Primary) { "Send" }
+    }
 }
