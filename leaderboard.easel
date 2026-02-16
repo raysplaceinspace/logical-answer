@@ -1,10 +1,6 @@
 pub accumulator owner.BestSalary
 
 pub page fn owner.LeaderboardPage() {
-    Toolbar {
-        VolumeToggle
-    }
-    
     Content {
         H1 { "Leaderboard" }
         P {
