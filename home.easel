@@ -6,9 +6,14 @@ pub page fn owner.HomePage {
             Icon("fa-solid fa-trophy")
             " Leaderboard"
         }
+        
         FlatButton(AboutPage) {
             Icon("fa-solid fa-info-circle")
-            " About this Game"
+            " About"
+        }
+        FlatButton(ShareIntent) {
+            Icon("fa-solid fa-share")
+            " Share"
         }
     }
 

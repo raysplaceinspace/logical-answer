@@ -432,8 +432,9 @@ fn this.VictoryScreen(salary, isNewHighScore, [owner]) {
             }
             Blank(height=1)
             HStack(align=Align:Center) {
-                RaisedButton(Main, backgroundColor=Color:Primary) { "Play Again" }
+                RaisedButton(Main, backgroundColor=Color:Secondary) { "Play Again" }
                 RaisedButton(LeaderboardPage, backgroundColor=Color:Secondary) { "High Scores" }
+                RaisedButton(ShareIntent, backgroundColor=Color:Primary) { "Share" }
             }
         }
     }
@@ -466,6 +467,7 @@ fn this.DefeatScreen([owner]) {
             HStack(align=Align:Center) {
                 RaisedButton(Main, backgroundColor=Color:Primary) { "Play Again" }
                 RaisedButton(LeaderboardPage, backgroundColor=Color:Secondary) { "High Scores" }
+                RaisedButton(ShareIntent, backgroundColor=Color:Secondary) { "Share" }
             }
         }
     }
