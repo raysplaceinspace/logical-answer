@@ -14,8 +14,6 @@ pub page fn owner.AboutPage() {
             " and "
             Link("https://en.wikipedia.org/wiki/Spoon_theory") { "Spoon theory" }
             ". "
-            "The interview content is all based on my real-life interactions interviewing (or co-interviewing) "
-            "around 100-200 software engineers over the course of my career. "
         }
     }
 }
