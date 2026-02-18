@@ -77,13 +77,13 @@ await fn this.TalentAcquisitionInterview([owner]) {
         await Tick(0.1s)
 
         let reply = await ChooseReply([
-            "I don't know. " + 'How do you define "ready"?',
+            "Is anyone ever ready for a job interview?",
             "Yes, I am ready!",
         ], energyCost=1)
 
         await Tick(0.2s)
-        if reply.Contains("define") {
-            ReceiveChat("Well, shall we go ahead?")
+        if !reply.Contains("Yes") {
+            ReceiveChat("Shall we go ahead or not?")
             TeamFit -= 1
             await ChooseReply(["Yes, please go ahead"])
         } else {
